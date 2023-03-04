@@ -42,14 +42,15 @@ def fetch_one_asset_type_price(dict_of_asset_type, asset_type):
             print(f"\n################\nError fetching data for {asset_type} {dict_of_asset_type[asset]} ---------> {str(e)}\n################\n")
     return dict_of_one_asset_type_prices
 
-# This function import data from file by default named "assets_input.json" or other if it's given in function argument. If wanted file is stored in the same location as code file, it'll returns file content
-def import_data(name_of_file = "assets_input.json"):
+# This function is using name of file to create path of file with given name located in the same directory as source code in python.
+def set_file_path(name_of_file):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, name_of_file)
-    print (dir_path)
-    print (file_path)
+    file_path = (os.path.join(dir_path, name_of_file))
+    return file_path
+
+# This function returns content of file that path is given as an input.
+def import_data(file_path):
     try:
-        print (file_path)
         with open(file_path, "r", encoding="UTF-8") as file:
             return json.load(file)
     except FileNotFoundError as e:
@@ -58,13 +59,17 @@ def import_data(name_of_file = "assets_input.json"):
 
 #################################################------------------> INPUT START <------------------#################################################
 # It fetches list of dictionaries from YAML file
-big_list = (import_data())
+big_list = (import_data(set_file_path("assets_to_be_checked_input.json")))
 
 
 #################################################-----------------> TRIGGER START <-----------------#################################################
 dict_of_assets_with_prices = (fetch_all_assets_prices(big_list))
-for dictionary in dict_of_assets_with_prices:
-    print (f"----------------------- {dictionary} -----------------------")
-    for assets_with_prices in dict_of_assets_with_prices[dictionary]:
-       print (f"{assets_with_prices} ====== {round_accordingly_to_value_size(dict_of_assets_with_prices[dictionary][assets_with_prices])}")
+try:
+    with open(set_file_path("assets_output.txt"), "w") as file:
+        for dictionary in dict_of_assets_with_prices:
+            file.write (f"\n\n----------------------- {dictionary} -----------------------")
+            for assets_with_prices in dict_of_assets_with_prices[dictionary]:
+                file.write (f"\n{assets_with_prices} ====== {round_accordingly_to_value_size(dict_of_assets_with_prices[dictionary][assets_with_prices])}")
+except Exception as e:
+        print(f"\n################\nError exporting TXT data ---------> {str(e)}\n################\n")
 
