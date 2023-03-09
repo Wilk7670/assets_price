@@ -46,7 +46,7 @@ def round_to_X_significant_digits(value_to_be_rounded, significant_digit):
 # Import data fron input .json fies.
 main_dict = (import_data(standardize_file_path("input_assets_to_be_checked.json")))
 exchange_rates_dict_input = (import_data(standardize_file_path("input_exchange_rates.json")))
-wanted_output = (import_data(standardize_file_path("input-wanted_result.json")))
+wanted_output = (import_data(standardize_file_path("input_wanted_result.json")))
 
 # Fetching exchange rates into dictionary
 updated_exchange_rates_dict = {}
