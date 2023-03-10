@@ -41,50 +41,52 @@ def round_to_X_significant_digits(value_to_be_rounded, significant_digit):
 
 
 
-
-
 # Import data fron input .json fies.
-main_dict = (import_data(standardize_file_path("input_assets_to_be_checked.json")))
-exchange_rates_dict_input = (import_data(standardize_file_path("input_exchange_rates.json")))
-wanted_output = (import_data(standardize_file_path("input_wanted_result.json")))
+yahoo_all_assets_dictionary = (import_data(standardize_file_path("input_assets_to_be_checked.json")))
+yahoo_exchange_rates_dictionary = (import_data(standardize_file_path("input_exchange_rates.json")))
+wanted_output_list = (import_data(standardize_file_path("input_wanted_result.json")))
 
 # Fetching exchange rates into dictionary
 updated_exchange_rates_dict = {}
-for ex_rate in exchange_rates_dict_input:
-    price = (fetch_price(exchange_rates_dict_input[ex_rate]))
+for ex_rate in yahoo_exchange_rates_dictionary:
+    price = (fetch_price(yahoo_exchange_rates_dictionary[ex_rate]))
     updated_exchange_rates_dict[ex_rate] = price
-
+    
+    
 # Fetching price for the rest of assets and merging it with a exchange rates dictionary. That part covers scenario_1 where wanted output 
 # can be simply fetched from yahoo finance and scenario_2 where price fetched from yahoo finance need to be recalculated using exchange rate. 
-updated_main_dict = updated_exchange_rates_dict.copy()
-for item in wanted_output:
+# ---------------- (explanation by example: "APPL/USD" is asset_quote, "APPL" is asset_name and "USD" is asset_currency) ----------------
+final_output_dict = {}
+for wanted_output_asset_quote in wanted_output_list:
     # scenario_1
-    if item in main_dict:
-        price = (fetch_price(main_dict[item]))
-        updated_main_dict[item] = price
-    # scenario_2
+    if wanted_output_asset_quote in yahoo_all_assets_dictionary:
+        price = (fetch_price(yahoo_all_assets_dictionary[wanted_output_asset_quote]))
+        final_output_dict[wanted_output_asset_quote] = price
+    # scenario_2 
     else:
-        wanted_output_asset = (item.split("/")[0])
-        wanted_output_currency = (item.split("/")[1])
+        wanted_output_asset_name = (wanted_output_asset_quote.split("/")[0])
+        wanted_output_asset_currency = (wanted_output_asset_quote.split("/")[1])
         # Searching in main dictionary what is the quotation currency of wanted asset
-        for element in main_dict:
-            if element.split("/")[0] == wanted_output_asset:
+        for yahoo_one_asset_quote in yahoo_all_assets_dictionary:
+            yahoo_one_asset_name = yahoo_one_asset_quote.split("/")[0]
+            yahoo_one_asset_currency = yahoo_one_asset_quote.split("/")[1]
+            if yahoo_one_asset_name == wanted_output_asset_name:
                 # Defining what currency pair should be used for a recalculation of price
-                required_ex_rate = (f'{element.split("/")[1]}/{wanted_output_currency}')
+                required_ex_rate = (f'{yahoo_one_asset_currency}/{wanted_output_asset_currency}')
                 break
         # Calculation of asset price in wanted currency
-        price_to_be_exchanged = (fetch_price(main_dict[element]))
+        price_to_be_exchanged = (fetch_price(yahoo_all_assets_dictionary[yahoo_one_asset_quote]))
         ex_rate_to_be_uesed = (updated_exchange_rates_dict[required_ex_rate])
         price = (price_to_be_exchanged * ex_rate_to_be_uesed)
-        updated_main_dict[item] = price
-print (updated_main_dict)
+        final_output_dict[wanted_output_asset_quote] = price
+
 
 # Save output_assets.txt file with prices of assets from input-wanted_result.json file. 
 try:
-    with open(standardize_file_path("output_assets.txt"), "w") as file:
-        for line in updated_main_dict:
-            price = updated_main_dict[line]
-            file.write (f'\n{line} === {round_accordingly_to_value_size(price)}')
+    with open(standardize_file_path("output_assets.txt"), "w", encoding="UTF-8") as file:
+        for line in final_output_dict:
+            price = final_output_dict[line]
+            price = round_accordingly_to_value_size(price)
+            file.write (f'{line}\n{str(price).replace(".", ",")}\n\n')
 except Exception as e:
         print(f"\n################\nError exporting TXT data ---------> {str(e)}\n################\n")
-

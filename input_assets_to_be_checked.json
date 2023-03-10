@@ -9,5 +9,10 @@
     "ATOM/USD": "ATOM-USD", 
     "DOT/USD": "DOT-USD", 
     "YLD/USD": "YLD8066-USD", 
-    "BNB/USD": "BNB-USD"
+    "BNB/USD": "BNB-USD",
+    "V_SP500/USD": "VUAA.L",
+    "USD/EUR": "EUR=X", 
+    "CHF/EUR": "CHFEUR=X", 
+    "USD/PLN": "PLN=X", 
+    "EUR/PLN": "EURPLN=X"
 }
